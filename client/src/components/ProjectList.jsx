@@ -1,15 +1,22 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { motion } from 'framer-motion'; // Importamos la magia de las animaciones
+import { motion } from 'framer-motion';
 
 const ProjectList = () => {
   const [projects, setProjects] = useState([]);
 
   useEffect(() => {
-    // Conexión al backend en el puerto 5000
-    axios.get('https://portafoliopersonalfinal.onrender.com')
+    // 1. Definimos la URL base usando la variable de entorno de Vite
+    // Es vital que en Vercel la variable VITE_API_URL termine en /api
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    
+    // 2. Concatenamos /projects a la base
+    axios.get(`${API_URL}/projects`)
       .then(res => setProjects(res.data))
-      .catch(err => console.error("Error al cargar proyectos:", err));
+      .catch(err => {
+        console.error("Error al cargar proyectos:", err);
+        // Tip: Si sale 404 aquí, revisa que VITE_API_URL en Vercel no tenga una "/" al final
+      });
   }, []);
 
   return (
@@ -24,22 +31,17 @@ const ProjectList = () => {
         projects.map((project, index) => (
           <motion.div 
             key={project._id} 
-            // ANIMACIÓN DE ENTRADA: Aparecen uno por uno
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
-            // EFECTO HOVER: Se eleva y brilla
             whileHover={{ y: -10 }}
             className="group relative bg-[#0a192f] border border-blue-500/10 p-1 rounded-3xl transition-all duration-500 hover:shadow-[0_0_40px_rgba(59,130,246,0.15)]"
           >
-            {/* Contenedor Interno con Glassmorphism */}
             <div className="bg-[#112240] p-8 rounded-[1.4rem] h-full flex flex-col relative overflow-hidden">
               
-              {/* Reflejo de luz interno al hacer hover */}
               <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-              {/* Header: Icono y Enlaces */}
               <div className="flex justify-between items-start mb-6 relative z-10">
                 <div className="text-blue-400">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -58,7 +60,6 @@ const ProjectList = () => {
                 </div>
               </div>
 
-              {/* Título y Descripción */}
               <div className="relative z-10">
                 <h3 className="text-2xl font-bold text-slate-100 group-hover:text-blue-400 transition-colors mb-4">
                   {project.title}
@@ -69,7 +70,6 @@ const ProjectList = () => {
                 </p>
               </div>
               
-              {/* Stack de Tecnologías */}
               <div className="flex flex-wrap gap-x-4 gap-y-2 mt-8 relative z-10">
                 {project.technologies.map((tech) => (
                   <span 
