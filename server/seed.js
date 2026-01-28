@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Project from './models/Project.js'; // Asegúrate de que la ruta sea correcta
+import Project from './models/Project.js'; 
 import dotenv from 'dotenv';
 
 dotenv.config();
