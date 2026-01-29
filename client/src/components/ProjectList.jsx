@@ -6,16 +6,15 @@ const ProjectList = () => {
   const [projects, setProjects] = useState([]);
 
   useEffect(() => {
-    // 1. Definimos la URL base usando la variable de entorno de Vite
-    // Es vital que en Vercel la variable VITE_API_URL termine en /api
+
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
     
-    // 2. Concatenamos /projects a la base
+
     axios.get(`${API_URL}/projects`)
       .then(res => setProjects(res.data))
       .catch(err => {
         console.error("Error al cargar proyectos:", err);
-        // Tip: Si sale 404 aquí, revisa que VITE_API_URL en Vercel no tenga una "/" al final
+
       });
   }, []);
 

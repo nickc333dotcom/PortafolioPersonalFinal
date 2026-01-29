@@ -12,27 +12,27 @@ dotenv.config();
 
 const app = express();
 
-// 2. MIDDLEWARES DE SEGURIDAD
-app.use(helmet()); // Blindaje de seguridad básica
+// 2MIDDLEWARES DE SEGURIDAD
+app.use(helmet()); 
 app.use(cors()); // Permite peticiones externas (Frontend)
-app.use(express.json({ limit: '10kb' })); // Limita el tamaño del JSON para evitar ataques de sobrecarga
+app.use(express.json({ limit: '10kb' })); 
 
-// Limitador de peticiones: evita que alguien colapse tu API
+
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100, // Máximo 100 peticiones por ventana
+  windowMs: 15 * 60 * 1000, 
+  max: 100, 
   message: "Demasiadas peticiones desde esta IP, intenta más tarde."
 });
 app.use('/api/', limiter);
 
-// 3. CONEXIÓN A MONGOOSE
+//  CONEXIÓN A MONGOOSE
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('Base de datos protegida y conectada ✅'))
   .catch(err => console.error('Error al conectar a MongoDB ❌', err));
 
-// 4. RUTAS (Lógica de Negocio)
+//  RUTAS 
 
-// Obtener proyectos (Público)
+// Obtener proyectos 
 app.get('/api/projects', async (req, res) => {
   try {
     const projects = await Project.find().sort({ createdAt: -1 });
@@ -42,7 +42,7 @@ app.get('/api/projects', async (req, res) => {
   }
 });
 
-// Crear proyecto (Idealmente debería tener un middleware de Auth después)
+// Crear proyecto 
 app.post('/api/projects', async (req, res) => {
   try {
     const newProject = new Project(req.body);
@@ -53,7 +53,31 @@ app.post('/api/projects', async (req, res) => {
   }
 });
 
-// 5. ARRANCAR SERVIDOR
+// Eliminar proyecto (Para el Panel Admin)
+app.delete('/api/projects/:id', async (req, res) => {
+  try {
+    await Project.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Proyecto eliminado con éxito' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al eliminar el proyecto' });
+  }
+});
+
+//  Actualizar proyecto (Para el Panel Admin)
+app.put('/api/projects/:id', async (req, res) => {
+  try {
+    const updatedProject = await Project.findByIdAndUpdate(
+      req.params.id, 
+      req.body, 
+      { new: true }
+    );
+    res.json(updatedProject);
+  } catch (error) {
+    res.status(400).json({ message: 'Error al actualizar el proyecto' });
+  }
+});
+
+//  ARRANCAR SERVIDOR
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`app corriendo en ${PORT}`);
